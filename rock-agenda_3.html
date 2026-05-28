@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Rock Agenda — Shows de Rock</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Metal+Mania&family=Oswald:wght@300;400;600;700&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --bg3: #181818;
+    --bg4: #222222;
+    --border: #2a2a2a;
+    --border2: #3a3a3a;
+    --red: #cc0000;
+    --red2: #ff2222;
+    --red3: #ff6666;
+    --gold: #b8860b;
+    --gold2: #daa520;
+    --text: #e8e8e8;
+    --text2: #aaaaaa;
+    --text3: #666666;
+    --font-title: 'Metal Mania', cursive;
+    --font-head: 'Oswald', sans-serif;
+    --font-body: 'Barlow', sans-serif;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--red); border-radius: 3px; }
+
+  /* NAVBAR */
+  .navbar {
+    background: #000;
+    border-bottom: 2px solid var(--red);
+    padding: 0 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .navbar-logo {
+    font-family: var(--font-title);
+    font-size: 1.6rem;
+    color: var(--red2);
+    letter-spacing: 2px;
+    padding: 0.8rem 0;
+    text-shadow: 0 0 20px rgba(204,0,0,0.5);
+  }
+  .navbar-logo span { color: var(--gold2); }
+  .nav-links {
+    display: flex;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--text2);
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 1.2rem 1rem;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { color: var(--text); }
+  .nav-btn.active { color: var(--red2); border-bottom-color: var(--red2); }
+
+  /* LAYOUT */
+  .page { padding: 2rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+
+  /* PAGE HEADER */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .page-title {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .page-title span { color: var(--red2); }
+
+  /* BUTTONS */
+  .btn {
+    font-family: var(--font-head);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 2px;
+  }
+  .btn-primary {
+    background: var(--red);
+    color: #fff;
+    border: 1px solid var(--red2);
+  }
+  .btn-primary:hover { background: var(--red2); transform: translateY(-1px); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text3); }
+  .btn-danger {
+    background: transparent;
+    color: #ff4444;
+    border: 1px solid #550000;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+  .btn-danger:hover { background: #330000; }
+  .btn-edit {
+    background: transparent;
+    color: var(--gold2);
+    border: 1px solid #443300;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+  .btn-edit:hover { background: #221a00; }
+  .btn-sm { font-size: 0.7rem; padding: 0.35rem 0.7rem; }
+
+  /* FILTERS */
+  .filters {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .search-input {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 0.55rem 1rem;
+    border-radius: 2px;
+    font-size: 0.9rem;
+    flex: 1;
+    min-width: 180px;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { outline: none; border-color: var(--red); }
+  .search-input::placeholder { color: var(--text3); }
+  .filter-select {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 0.55rem 1rem;
+    border-radius: 2px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .filter-select:focus { outline: none; border-color: var(--red); }
+
+  /* CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--red);
+    padding: 1.2rem;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+  }
+  .card:hover { border-color: var(--border2); transform: translateY(-2px); }
+  .card:hover { border-top-color: var(--red2); }
+  .card-title {
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+  }
+  .card-sub {
+    font-size: 0.8rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.8rem;
+    font-family: var(--font-head);
+  }
+  .card-info {
+    font-size: 0.88rem;
+    color: var(--text2);
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .card-info-icon { color: var(--red); font-size: 0.8rem; }
+  .card-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+  .badge {
+    display: inline-block;
+    font-family: var(--font-head);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 1px;
+  }
+  .badge-genre { background: #1a0000; color: var(--red3); border: 1px solid #440000; }
+  .badge-country { background: #0a0a1a; color: #6699ff; border: 1px solid #222244; }
+  .badge-status-ok { background: #001a00; color: #44cc44; border: 1px solid #114411; }
+  .badge-status-sold { background: #1a0a00; color: var(--gold2); border: 1px solid #442200; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+  }
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-top: 3px solid var(--red);
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+  .modal-title {
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--red2);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .form-group { margin-bottom: 1rem; }
+  .form-label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 0.4rem;
+  }
+  .form-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 2px;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { outline: none; border-color: var(--red); }
+  .form-input::placeholder { color: var(--text3); }
+  .form-input option { background: var(--bg3); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text3);
+  }
+  .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+  .empty-state-text { font-family: var(--font-head); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; }
+
+  /* SHOWS special card */
+  .show-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--red);
+    padding: 1.2rem;
+    display: flex;
+    gap: 1rem;
+    transition: all 0.2s;
+  }
+  .show-card:hover { border-color: var(--border2); border-left-color: var(--red2); }
+  .show-date-box {
+    background: var(--red);
+    min-width: 56px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .show-date-day { font-family: var(--font-head); font-size: 1.6rem; font-weight: 700; line-height: 1; color: #fff; }
+  .show-date-month { font-family: var(--font-head); font-size: 0.65rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: rgba(255,255,255,0.8); }
+  .show-content { flex: 1; min-width: 0; }
+  .show-band { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+  .show-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, #0a0000 0%, #110000 50%, #0a0a0a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(204,0,0,0.03) 40px, rgba(204,0,0,0.03) 41px);
+  }
+  .hero-title {
+    font-family: var(--font-title);
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    color: var(--red2);
+    letter-spacing: 4px;
+    text-shadow: 0 0 40px rgba(204,0,0,0.6), 0 4px 0 #000;
+    position: relative;
+  }
+  .hero-sub {
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    letter-spacing: 4px;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+    position: relative;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+  .stat-item { text-align: center; }
+  .stat-num { font-family: var(--font-head); font-size: 2rem; font-weight: 700; color: var(--red2); }
+  .stat-label { font-family: var(--font-head); font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); }
+
+  /* SEPARATOR */
+  .sep { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+
+  /* TAGS for members */
+  .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem; }
+  .tag {
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 1px;
+    font-family: var(--font-head);
+    letter-spacing: 0.5px;
+  }
+
+  @media (max-width: 600px) {
+    .navbar { padding: 0 0.75rem; }
+    .navbar-logo { font-size: 1.2rem; }
+    .nav-btn { padding: 0.9rem 0.6rem; font-size: 0.75rem; }
+    .page { padding: 1rem 0.75rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .page-title { font-size: 1.3rem; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .show-card { flex-direction: column; }
+    .show-date-box { flex-direction: row; gap: 0.5rem; min-width: unset; width: 100%; justify-content: flex-start; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+// ─── STORAGE HELPERS ───────────────────────────────────────────────
+const load = (key, def) => {
+  try { const d = localStorage.getItem(key); return d ? JSON.parse(d) : def; } catch { return def; }
+};
+const save = (key, val) => { try { localStorage.setItem(key, JSON.stringify(val)); } catch {} };
+const uid = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+
+// ─── INITIAL DATA ──────────────────────────────────────────────────
+const BANDAS_INIT = [
+  { id: uid(), nome: 'Metallica', genero: 'Heavy Metal', pais: 'EUA', anoFundacao: '1981', descricao: 'Uma das maiores bandas de metal de todos os tempos.' },
+  { id: uid(), nome: 'Slipknot', genero: 'Nu Metal', pais: 'EUA', anoFundacao: '1995', descricao: 'Banda conhecida pelo visual agressivo e sons pesados.' },
+  { id: uid(), nome: 'Korn', genero: 'Nu Metal', pais: 'EUA', anoFundacao: '1993', descricao: 'Pioneiros do Nu Metal.' },
+  { id: uid(), nome: 'System of a Down', genero: 'Metal Alternativo', pais: 'EUA', anoFundacao: '1994', descricao: 'Banda armênio-americana com letras políticas.' },
+  { id: uid(), nome: 'Rammstein', genero: 'Industrial Metal', pais: 'Alemanha', anoFundacao: '1994', descricao: 'Banda alemã de Neue Deutsche Härte.' },
+  { id: uid(), nome: "Guns N' Roses", genero: 'Hard Rock', pais: 'EUA', anoFundacao: '1985', descricao: 'Lendas do hard rock dos anos 80 e 90.' },
+  { id: uid(), nome: 'Black Sabbath', genero: 'Heavy Metal', pais: 'Reino Unido', anoFundacao: '1968', descricao: 'Criadores do heavy metal.' },
+  { id: uid(), nome: 'Iron Maiden', genero: 'Heavy Metal', pais: 'Reino Unido', anoFundacao: '1975', descricao: 'Ícones do heavy metal britânico com Eddie como mascote.' },
+  { id: uid(), nome: 'Sepultura', genero: 'Thrash Metal', pais: 'Brasil', anoFundacao: '1984', descricao: 'A maior banda de metal do Brasil.' },
+  { id: uid(), nome: 'Angra', genero: 'Power Metal', pais: 'Brasil', anoFundacao: '1991', descricao: 'Referência no power metal progressivo brasileiro.' },
+  { id: uid(), nome: 'Queen', genero: 'Rock', pais: 'Reino Unido', anoFundacao: '1970', descricao: 'Uma das bandas mais influentes da história do rock.' },
+];
+
+const LOCAIS_INIT = [
+  { id: uid(), nome: 'Allianz Parque', cidade: 'São Paulo', estado: 'SP', capacidade: '45000', endereco: 'R. Palestra Itália, 200' },
+  { id: uid(), nome: 'Estádio do Engenhão', cidade: 'Rio de Janeiro', estado: 'RJ', capacidade: '46000', endereco: 'R. José dos Reis, 425' },
+  { id: uid(), nome: 'Mineirão', cidade: 'Belo Horizonte', estado: 'MG', capacidade: '58000', endereco: 'Av. Antônio Abrahão Caram, 1001' },
+  { id: uid(), nome: 'Espaço Unimed', cidade: 'São Paulo', estado: 'SP', capacidade: '15000', endereco: 'R. Tagipuru, 795' },
+  { id: uid(), nome: 'Arena Castelão', cidade: 'Fortaleza', estado: 'CE', capacidade: '63000', endereco: 'Av. Alberto Craveiro, s/n' },
+];
+
+// ─── MODAL ─────────────────────────────────────────────────────────
+function Modal({ title, onClose, children }) {
+  useEffect(() => {
+    const esc = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', esc);
+    return () => window.removeEventListener('keydown', esc);
+  }, [onClose]);
+  return (
+    <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal">
+        <div className="modal-title">{title}</div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+// ─── BANDAS ────────────────────────────────────────────────────────
+const GENEROS = ['Heavy Metal','Thrash Metal','Death Metal','Black Metal','Power Metal','Nu Metal','Hard Rock','Industrial Metal','Metal Alternativo','Rock','Doom Metal','Glam Metal','Grunge','Prog Metal'];
+
+function BandaForm({ initial, onSave, onCancel }) {
+  const [f, setF] = useState(initial || { nome:'', genero:'Heavy Metal', pais:'', anoFundacao:'', descricao:'' });
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+  return (
+    <>
+      <div className="form-group">
+        <label className="form-label">Nome da Banda *</label>
+        <input className="form-input" value={f.nome} onChange={e => set('nome', e.target.value)} placeholder="Ex: Metallica" />
+      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Gênero *</label>
+          <select className="form-input" value={f.genero} onChange={e => set('genero', e.target.value)}>
+            {GENEROS.map(g => <option key={g}>{g}</option>)}
+          </select>
+        </div>
+        <div className="form-group">
+          <label className="form-label">País de Origem</label>
+          <input className="form-input" value={f.pais} onChange={e => set('pais', e.target.value)} placeholder="Ex: EUA" />
+        </div>
+      </div>
+      <div className="form-group">
+        <label className="form-label">Ano de Fundação</label>
+        <input className="form-input" type="number" value={f.anoFundacao} onChange={e => set('anoFundacao', e.target.value)} placeholder="Ex: 1981" />
+      </div>
+      <div className="form-group">
+        <label className="form-label">Descrição</label>
+        <textarea className="form-input" rows="3" value={f.descricao} onChange={e => set('descricao', e.target.value)} placeholder="Breve descrição da banda..." style={{resize:'vertical'}} />
+      </div>
+      <div className="modal-actions">
+        <button className="btn btn-ghost" onClick={onCancel}>Cancelar</button>
+        <button className="btn btn-primary" onClick={() => f.nome.trim() && onSave(f)}>Salvar</button>
+      </div>
+    </>
+  );
+}
+
+function BandasPage({ bandas, setBandas, integrantes }) {
+  const [modal, setModal] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterGenero, setFilterGenero] = useState('');
+
+  const filtered = bandas.filter(b => {
+    const ok = b.nome.toLowerCase().includes(search.toLowerCase());
+    const gOk = !filterGenero || b.genero === filterGenero;
+    return ok && gOk;
+  });
+
+  const save = (f, id) => {
+    if (id) {
+      setBandas(p => p.map(b => b.id === id ? { ...b, ...f } : b));
+    } else {
+      setBandas(p => [...p, { ...f, id: uid() }]);
+    }
+    setModal(null);
+  };
+  const del = (id) => {
+    if (window.confirm('Excluir esta banda?')) setBandas(p => p.filter(b => b.id !== id));
+  };
+
+  const membros = (bandaId) => integrantes.filter(i => i.bandaId === bandaId);
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <h1 className="page-title">🎸 <span>Bandas</span></h1>
+        <button className="btn btn-primary" onClick={() => setModal({ type: 'new' })}>+ Nova Banda</button>
+      </div>
+      <div className="filters">
+        <input className="search-input" placeholder="Buscar banda..." value={search} onChange={e => setSearch(e.target.value)} />
+        <select className="filter-select" value={filterGenero} onChange={e => setFilterGenero(e.target.value)}>
+          <option value="">Todos os gêneros</option>
+          {GENEROS.map(g => <option key={g}>{g}</option>)}
+        </select>
+      </div>
+      {filtered.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">🤘</div>
+          <div className="empty-state-text">Nenhuma banda encontrada</div>
+        </div>
+      ) : (
+        <div className="cards-grid">
+          {filtered.map(b => {
+            const m = membros(b.id);
+            return (
+              <div key={b.id} className="card">
+                <div className="card-title">{b.nome}</div>
+                <div style={{display:'flex', gap:'0.4rem', flexWrap:'wrap', marginBottom:'0.6rem'}}>
+                  <span className="badge badge-genre">{b.genero}</span>
+                  {b.pais && <span className="badge badge-country">{b.pais}</span>}
+                </div>
+                {b.anoFundacao && <div className="card-info"><span className="card-info-icon">◆</span> Fundada em {b.anoFundacao}</div>}
+                {b.descricao && <div className="card-info" style={{fontSize:'0.82rem', color:'var(--text3)', marginTop:'0.4rem'}}>{b.descricao}</div>}
+                {m.length > 0 && (
+                  <div className="tags" style={{marginTop:'0.75rem'}}>
+                    {m.slice(0,4).map(mb => <span key={mb.id} className="tag">{mb.nome}</span>)}
+                    {m.length > 4 && <span className="tag">+{m.length-4}</span>}
+                  </div>
+                )}
+                <div className="card-actions">
+                  <button className="btn btn-edit" onClick={() => setModal({ type: 'edit', banda: b })}>Editar</button>
+                  <button className="btn btn-danger" onClick={() => del(b.id)}>Excluir</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {modal?.type === 'new' && (
+        <Modal title="Nova Banda" onClose={() => setModal(null)}>
+          <BandaForm onSave={(f) => save(f)} onCancel={() => setModal(null)} />
+        </Modal>
+      )}
+      {modal?.type === 'edit' && (
+        <Modal title="Editar Banda" onClose={() => setModal(null)}>
+          <BandaForm initial={modal.banda} onSave={(f) => save(f, modal.banda.id)} onCancel={() => setModal(null)} />
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ─── INTEGRANTES ───────────────────────────────────────────────────
+const INSTRUMENTOS = ['Vocal','Guitarra','Baixo','Bateria','Teclado','Guitarra Solo','Guitarra Base','DJ','Violino','Gaita','Acordeon'];
+
+function IntegranteForm({ initial, bandas, onSave, onCancel }) {
+  const [f, setF] = useState(initial || { nome:'', instrumento:'Vocal', bandaId: bandas[0]?.id || '', apelido:'' });
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+  return (
+    <>
+      <div className="form-group">
+        <label className="form-label">Nome Completo *</label>
+        <input className="form-input" value={f.nome} onChange={e => set('nome', e.target.value)} placeholder="Ex: James Hetfield" />
+      </div>
+      <div className="form-group">
+        <label className="form-label">Apelido / Nome Artístico</label>
+        <input className="form-input" value={f.apelido} onChange={e => set('apelido', e.target.value)} placeholder="Ex: Het" />
+      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Instrumento *</label>
+          <select className="form-input" value={f.instrumento} onChange={e => set('instrumento', e.target.value)}>
+            {INSTRUMENTOS.map(i => <option key={i}>{i}</option>)}
+          </select>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Banda *</label>
+          <select className="form-input" value={f.bandaId} onChange={e => set('bandaId', e.target.value)}>
+            {bandas.map(b => <option key={b.id} value={b.id}>{b.nome}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="modal-actions">
+        <button className="btn btn-ghost" onClick={onCancel}>Cancelar</button>
+        <button className="btn btn-primary" onClick={() => f.nome.trim() && f.bandaId && onSave(f)}>Salvar</button>
+      </div>
+    </>
+  );
+}
+
+function IntegrantesPage({ integrantes, setIntegrantes, bandas }) {
+  const [modal, setModal] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterBanda, setFilterBanda] = useState('');
+
+  const filtered = integrantes.filter(i => {
+    const ok = i.nome.toLowerCase().includes(search.toLowerCase());
+    const bOk = !filterBanda || i.bandaId === filterBanda;
+    return ok && bOk;
+  });
+
+  const save = (f, id) => {
+    if (id) setIntegrantes(p => p.map(i => i.id === id ? { ...i, ...f } : i));
+    else setIntegrantes(p => [...p, { ...f, id: uid() }]);
+    setModal(null);
+  };
+  const del = (id) => { if (window.confirm('Excluir?')) setIntegrantes(p => p.filter(i => i.id !== id)); };
+  const getBanda = (id) => bandas.find(b => b.id === id);
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <h1 className="page-title">🎤 <span>Integrantes</span></h1>
+        <button className="btn btn-primary" onClick={() => bandas.length ? setModal({ type:'new' }) : alert('Cadastre uma banda primeiro!')}>+ Novo Integrante</button>
+      </div>
+      <div className="filters">
+        <input className="search-input" placeholder="Buscar integrante..." value={search} onChange={e => setSearch(e.target.value)} />
+        <select className="filter-select" value={filterBanda} onChange={e => setFilterBanda(e.target.value)}>
+          <option value="">Todas as bandas</option>
+          {bandas.map(b => <option key={b.id} value={b.id}>{b.nome}</option>)}
+        </select>
+      </div>
+      {filtered.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">🎸</div>
+          <div className="empty-state-text">Nenhum integrante encontrado</div>
+        </div>
+      ) : (
+        <div className="cards-grid">
+          {filtered.map(i => {
+            const banda = getBanda(i.bandaId);
+            return (
+              <div key={i.id} className="card">
+                <div className="card-title">{i.nome}</div>
+                {i.apelido && <div className="card-sub">"{i.apelido}"</div>}
+                <div className="card-info"><span className="card-info-icon">♪</span> {i.instrumento}</div>
+                {banda && <div className="card-info"><span className="card-info-icon">◆</span> {banda.nome}</div>}
+                <div className="card-actions">
+                  <button className="btn btn-edit" onClick={() => setModal({ type:'edit', integrante: i })}>Editar</button>
+                  <button className="btn btn-danger" onClick={() => del(i.id)}>Excluir</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {modal?.type === 'new' && (
+        <Modal title="Novo Integrante" onClose={() => setModal(null)}>
+          <IntegranteForm bandas={bandas} onSave={f => save(f)} onCancel={() => setModal(null)} />
+        </Modal>
+      )}
+      {modal?.type === 'edit' && (
+        <Modal title="Editar Integrante" onClose={() => setModal(null)}>
+          <IntegranteForm initial={modal.integrante} bandas={bandas} onSave={f => save(f, modal.integrante.id)} onCancel={() => setModal(null)} />
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// ─── LOCAIS ────────────────────────────────────────────────────────
+const UFS = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+
+function LocalForm({ initial, onSave, onCancel }) {
+  const [f, setF] = useState(initial || { nome:'', cidade:'', estado:'SP', capacidade:'', endereco:'' });
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+  return (
+    <>
+      <div className="form-group">
+        <label className="form-label">Nome do Local *</label>
+        <input className="form-input" value={f.nome} onChange={e => set('nome', e.target.value)} placeholder="Ex: Allianz Parque" />
+      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Cidade *</label>
+          <input className="form-input" value={f.cidade} onChange={e => set('cidade', e.target.value)} placeholder="Ex: São Paulo" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Estado</label>
+          <select className="form-input" value={f.estado} onChange={e => set('estado', e.target.value)}>
+            {UFS.map(u => <option key={u}>{u}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="form-group">
+        <label className="form-label">Capacidade (pessoas)</label>
+        <input className="form-input" type="number" value={f.capacidade} onChange={e => set('capacidade', e.target.value)} placeholder="Ex: 45000" />
+      </div>
+      <div className="form-group">
+        <label className="form-label">Endereço</label>
+        <input className="form-input" value={f.endereco} onChange={e => set('endereco', e.target.value)} placeholder="Ex: Rua Palestra Itália, 200" />
+      </div>
+      <div className="modal-actions">
+        <button className="btn btn-ghost" onClick={onCancel}>Cancelar</button>
+        <button className="btn btn-primary" onClick={() => f.nome.trim() && f.cidade.trim() && onSave(f)}>Salvar</button>
+      </div>
+    </>
+  );
+}
+
+function LocaisPage({ locais, setLocais }) {
+  const [modal, setModal] = useState(null);
+  const [search, setSearch] = useState('');
+
+  const filtered = locais.filter(l => l.nome.toLowerCase().includes(search.toLowerCase()) || l.cidade.toLowerCase().includes(search.toLowerCase()));
+
+  const save = (f, id) => {
+    if (id) setLocais(p => p.map(l => l.id === id ? { ...l, ...f } : l));
+    else setLocais(p => [...p, { ...f, id: uid() }]);
+    setModal(null);
+  };
+  const del = (id) => { if (window.confirm('Excluir local?')) setLocais(p => p.filter(l => l.id !== id)); };
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <h1 className="page-title">📍 <span>Locais</span></h1>
+        <button className="btn btn-primary" onClick={() => setModal({ type:'new' })}>+ Novo Local</button>
+      </div>
+      <div className="filters">
+        <input className="search-input" placeholder="Buscar local ou cidade..." value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
+      {filtered.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">🗺️</div>
+          <div className="empty-state-text">Nenhum local encontrado</div>
+        </div>
+      ) : (
+        <div className="cards-grid">
+          {filtered.map(l => (
+            <div key={l.id} className="card">
+              <div className="card-title">{l.nome}</div>
+              <div className="card-info"><span className="card-info-icon">◆</span> {l.cidade} — {l.estado}</div>
+              {l.capacidade && <div className="card-info"><span className="card-info-icon">◆</span> Capacidade: {Number(l.capacidade).toLocaleString('pt-BR')} pessoas</div>}
+              {l.endereco && <div className="card-info" style={{fontSize:'0.82rem', color:'var(--text3)'}}>{l.endereco}</div>}
+              <div className="card-actions">
+                <button className="btn btn-edit" onClick={() => setModal({ type:'edit', local: l })}>Editar</button>
+                <button className="btn btn-danger" onClick={() => del(l.id)}>Excluir</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {modal?.type === 'new' && <Modal title="Novo Local" onClose={() => setModal(null)}><LocalForm onSave={f => save(f)} onCancel={() => setModal(null)} /></Modal>}
+      {modal?.type === 'edit' && <Modal title="Editar Local" onClose={() => setModal(null)}><LocalForm initial={modal.local} onSave={f => save(f, modal.local.id)} onCancel={() => setModal(null)} /></Modal>}
+    </div>
+  );
+}
+
+// ─── SHOWS ─────────────────────────────────────────────────────────
+function ShowForm({ initial, bandas, locais, onSave, onCancel }) {
+  const today = new Date().toISOString().slice(0,10);
+  const [f, setF] = useState(initial || { nome:'', bandaId: bandas[0]?.id || '', localId: locais[0]?.id || '', data: today, hora:'20:00', preco:'', status:'Disponível', descricao:'' });
+  const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+
+  const banda = bandas.find(b => b.id === f.bandaId);
+  const nomeAuto = banda ? `${banda.nome} — Show` : '';
+
+  return (
+    <>
+      <div className="form-group">
+        <label className="form-label">Nome do Show *</label>
+        <input className="form-input" value={f.nome} onChange={e => set('nome', e.target.value)} placeholder={nomeAuto || 'Ex: Metallica World Tour 2025'} />
+      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Banda *</label>
+          <select className="form-input" value={f.bandaId} onChange={e => set('bandaId', e.target.value)}>
+            {bandas.map(b => <option key={b.id} value={b.id}>{b.nome}</option>)}
+          </select>
+        </div>
+        <div className="form-group">
+          <label className="form-label">Local *</label>
+          <select className="form-input" value={f.localId} onChange={e => set('localId', e.target.value)}>
+            {locais.map(l => <option key={l.id} value={l.id}>{l.nome} — {l.cidade}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Data *</label>
+          <input className="form-input" type="date" value={f.data} onChange={e => set('data', e.target.value)} />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Horário</label>
+          <input className="form-input" type="time" value={f.hora} onChange={e => set('hora', e.target.value)} />
+        </div>
+      </div>
+      <div className="form-row">
+        <div className="form-group">
+          <label className="form-label">Preço (R$)</label>
+          <input className="form-input" type="number" value={f.preco} onChange={e => set('preco', e.target.value)} placeholder="Ex: 180" />
+        </div>
+        <div className="form-group">
+          <label className="form-label">Status</label>
+          <select className="form-input" value={f.status} onChange={e => set('status', e.target.value)}>
+            <option>Disponível</option>
+            <option>Esgotado</option>
+            <option>Cancelado</option>
+            <option>Confirmado</option>
+          </select>
+        </div>
+      </div>
+      <div className="form-group">
+        <label className="form-label">Descrição</label>
+        <textarea className="form-input" rows="2" value={f.descricao} onChange={e => set('descricao', e.target.value)} placeholder="Detalhes do show..." style={{resize:'vertical'}} />
+      </div>
+      <div className="modal-actions">
+        <button className="btn btn-ghost" onClick={onCancel}>Cancelar</button>
+        <button className="btn btn-primary" onClick={() => (f.nome.trim() || nomeAuto) && f.bandaId && f.localId && onSave({ ...f, nome: f.nome.trim() || nomeAuto })}>Salvar</button>
+      </div>
+    </>
+  );
+}
+
+function ShowsPage({ shows, setShows, bandas, locais }) {
+  const [modal, setModal] = useState(null);
+  const [search, setSearch] = useState('');
+  const [filterBanda, setFilterBanda] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
+  const filtered = shows
+    .filter(s => {
+      const ok = s.nome.toLowerCase().includes(search.toLowerCase());
+      const bOk = !filterBanda || s.bandaId === filterBanda;
+      const sOk = !filterStatus || s.status === filterStatus;
+      return ok && bOk && sOk;
+    })
+    .sort((a, b) => a.data > b.data ? 1 : -1);
+
+  const save = (f, id) => {
+    if (id) setShows(p => p.map(s => s.id === id ? { ...s, ...f } : s));
+    else setShows(p => [...p, { ...f, id: uid() }]);
+    setModal(null);
+  };
+  const del = (id) => { if (window.confirm('Excluir show?')) setShows(p => p.filter(s => s.id !== id)); };
+
+  const getBanda = id => bandas.find(b => b.id === id);
+  const getLocal = id => locais.find(l => l.id === id);
+
+  const fmtData = (dt) => {
+    const d = new Date(dt + 'T12:00:00');
+    const dia = String(d.getDate()).padStart(2,'0');
+    const mes = ['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][d.getMonth()];
+    return { dia, mes };
+  };
+
+  const statusBadge = (s) => {
+    if (s === 'Esgotado') return <span className="badge badge-status-sold">Esgotado</span>;
+    if (s === 'Disponível' || s === 'Confirmado') return <span className="badge badge-status-ok">{s}</span>;
+    return <span className="badge" style={{background:'#1a1a1a', color:'var(--text3)', border:'1px solid var(--border)'}}>{s}</span>;
+  };
+
+  return (
+    <div className="page">
+      <div className="page-header">
+        <h1 className="page-title">🎟 <span>Shows</span></h1>
+        <button className="btn btn-primary" onClick={() => bandas.length && locais.length ? setModal({ type:'new' }) : alert('Cadastre bandas e locais primeiro!')}>+ Novo Show</button>
+      </div>
+      <div className="filters">
+        <input className="search-input" placeholder="Buscar show..." value={search} onChange={e => setSearch(e.target.value)} />
+        <select className="filter-select" value={filterBanda} onChange={e => setFilterBanda(e.target.value)}>
+          <option value="">Todas as bandas</option>
+          {bandas.map(b => <option key={b.id} value={b.id}>{b.nome}</option>)}
+        </select>
+        <select className="filter-select" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+          <option value="">Todos os status</option>
+          <option>Disponível</option>
+          <option>Confirmado</option>
+          <option>Esgotado</option>
+          <option>Cancelado</option>
+        </select>
+      </div>
+      {filtered.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-state-icon">🎸</div>
+          <div className="empty-state-text">Nenhum show encontrado</div>
+        </div>
+      ) : (
+        <div className="show-list">
+          {filtered.map(s => {
+            const banda = getBanda(s.bandaId);
+            const local = getLocal(s.localId);
+            const { dia, mes } = fmtData(s.data);
+            return (
+              <div key={s.id} className="show-card">
+                <div className="show-date-box">
+                  <div className="show-date-day">{dia}</div>
+                  <div className="show-date-month">{mes}</div>
+                </div>
+                <div className="show-content">
+                  <div style={{display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:'0.5rem', flexWrap:'wrap'}}>
+                    <div className="show-band">{s.nome}</div>
+                    {statusBadge(s.status)}
+                  </div>
+                  <div className="card-info" style={{marginTop:'0.4rem'}}><span className="card-info-icon">◆</span> {banda?.nome || '—'}</div>
+                  {local && <div className="card-info"><span className="card-info-icon">◆</span> {local.nome} — {local.cidade}/{local.estado}</div>}
+                  <div style={{display:'flex', gap:'1rem', marginTop:'0.4rem', flexWrap:'wrap'}}>
+                    {s.hora && <div className="card-info"><span className="card-info-icon">◆</span> {s.hora}</div>}
+                    {s.preco && <div className="card-info"><span className="card-info-icon">◆</span> R$ {Number(s.preco).toLocaleString('pt-BR')}</div>}
+                  </div>
+                  <div className="card-actions">
+                    <button className="btn btn-edit" onClick={() => setModal({ type:'edit', show: s })}>Editar</button>
+                    <button className="btn btn-danger" onClick={() => del(s.id)}>Excluir</button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {modal?.type === 'new' && <Modal title="Novo Show" onClose={() => setModal(null)}><ShowForm bandas={bandas} locais={locais} onSave={f => save(f)} onCancel={() => setModal(null)} /></Modal>}
+      {modal?.type === 'edit' && <Modal title="Editar Show" onClose={() => setModal(null)}><ShowForm initial={modal.show} bandas={bandas} locais={locais} onSave={f => save(f, modal.show.id)} onCancel={() => setModal(null)} /></Modal>}
+    </div>
+  );
+}
+
+// ─── HOME ──────────────────────────────────────────────────────────
+function HomePage({ bandas, integrantes, locais, shows, setPage }) {
+  const proximos = shows
+    .filter(s => s.data >= new Date().toISOString().slice(0,10))
+    .sort((a, b) => a.data > b.data ? 1 : -1)
+    .slice(0, 4);
+
+  const getBanda = id => bandas.find(b => b.id === id);
+  const getLocal = id => locais.find(l => l.id === id);
+
+  const fmtData = (dt) => {
+    const d = new Date(dt + 'T12:00:00');
+    return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+  };
+
+  return (
+    <>
+      <div className="hero">
+        <div className="hero-title">Rock Agenda</div>
+        <div className="hero-sub">Sua agenda de shows de rock &amp; metal</div>
+        <div className="hero-stats">
+          <div className="stat-item"><div className="stat-num">{bandas.length}</div><div className="stat-label">Bandas</div></div>
+          <div className="stat-item"><div className="stat-num">{integrantes.length}</div><div className="stat-label">Integrantes</div></div>
+          <div className="stat-item"><div className="stat-num">{locais.length}</div><div className="stat-label">Locais</div></div>
+          <div className="stat-item"><div className="stat-num">{shows.length}</div><div className="stat-label">Shows</div></div>
+        </div>
+      </div>
+      <div className="page">
+        <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:'1rem', marginBottom:'2.5rem'}}>
+          {[
+            { icon:'🎸', label:'Gerenciar Bandas', page:'bandas', count: bandas.length },
+            { icon:'🎤', label:'Integrantes', page:'integrantes', count: integrantes.length },
+            { icon:'📍', label:'Locais de Show', page:'locais', count: locais.length },
+            { icon:'🎟', label:'Agenda de Shows', page:'shows', count: shows.length },
+          ].map(item => (
+            <button key={item.page} className="card" style={{cursor:'pointer', textAlign:'left', width:'100%', border:'1px solid var(--border)', borderTop:'3px solid var(--red)'}} onClick={() => setPage(item.page)}>
+              <div style={{fontSize:'1.8rem', marginBottom:'0.5rem'}}>{item.icon}</div>
+              <div className="card-title" style={{fontSize:'0.95rem'}}>{item.label}</div>
+              <div style={{fontFamily:'var(--font-head)', fontSize:'1.5rem', fontWeight:'700', color:'var(--red2)', marginTop:'0.25rem'}}>{item.count}</div>
+            </button>
+          ))}
+        </div>
+
+        {proximos.length > 0 && (
+          <>
+            <h2 className="page-title" style={{marginBottom:'1rem', fontSize:'1.2rem'}}>🔥 <span>Próximos Shows</span></h2>
+            <div className="show-list" style={{display:'flex', flexDirection:'column', gap:'0.75rem'}}>
+              {proximos.map(s => {
+                const banda = getBanda(s.bandaId);
+                const local = getLocal(s.localId);
+                return (
+                  <div key={s.id} className="show-card">
+                    <div className="show-date-box">
+                      <div className="show-date-day">{new Date(s.data+'T12:00:00').getDate()}</div>
+                      <div className="show-date-month">
+                        {['JAN','FEV','MAR','ABR','MAI','JUN','JUL','AGO','SET','OUT','NOV','DEZ'][new Date(s.data+'T12:00:00').getMonth()]}
+                      </div>
+                    </div>
+                    <div className="show-content">
+                      <div className="show-band">{s.nome}</div>
+                      <div className="card-info" style={{marginTop:'0.3rem'}}><span className="card-info-icon">◆</span> {banda?.nome || '—'}</div>
+                      {local && <div className="card-info"><span className="card-info-icon">◆</span> {local.nome} — {local.cidade}</div>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+    </>
+  );
+}
+
+// ─── APP ───────────────────────────────────────────────────────────
+function App() {
+  const [page, setPage] = useState('home');
+  const [bandas, setBandas] = useState(() => load('rk_bandas', BANDAS_INIT));
+  const [integrantes, setIntegrantes] = useState(() => load('rk_integrantes', []));
+  const [locais, setLocais] = useState(() => load('rk_locais', LOCAIS_INIT));
+  const [shows, setShows] = useState(() => load('rk_shows', []));
+
+  useEffect(() => save('rk_bandas', bandas), [bandas]);
+  useEffect(() => save('rk_integrantes', integrantes), [integrantes]);
+  useEffect(() => save('rk_locais', locais), [locais]);
+  useEffect(() => save('rk_shows', shows), [shows]);
+
+  const pages = [
+    { id:'home', label:'Início' },
+    { id:'bandas', label:'Bandas' },
+    { id:'integrantes', label:'Integrantes' },
+    { id:'locais', label:'Locais' },
+    { id:'shows', label:'Shows' },
+  ];
+
+  return (
+    <>
+      <nav className="navbar">
+        <div className="navbar-logo">🤘 Rock<span>Agenda</span></div>
+        <div className="nav-links">
+          {pages.map(p => (
+            <button key={p.id} className={`nav-btn ${page === p.id ? 'active' : ''}`} onClick={() => setPage(p.id)}>
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </nav>
+
+      {page === 'home' && <HomePage bandas={bandas} integrantes={integrantes} locais={locais} shows={shows} setPage={setPage} />}
+      {page === 'bandas' && <BandasPage bandas={bandas} setBandas={setBandas} integrantes={integrantes} />}
+      {page === 'integrantes' && <IntegrantesPage integrantes={integrantes} setIntegrantes={setIntegrantes} bandas={bandas} />}
+      {page === 'locais' && <LocaisPage locais={locais} setLocais={setLocais} />}
+      {page === 'shows' && <ShowsPage shows={shows} setShows={setShows} bandas={bandas} locais={locais} />}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
